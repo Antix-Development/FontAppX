@@ -7,6 +7,7 @@ using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -99,6 +100,7 @@ public partial class MainWindow : Window
     bool UpdatingForm;
 
     string ProjectName;
+    string ExportName;
 
     /// <summary>
     /// Initialize main window and install event handlers
@@ -938,11 +940,118 @@ public partial class MainWindow : Window
 
     private void ExportProject()
     {
-        Log("ExportProject()");
+        if (ExportName != null)
+        {
+            try
+            {
+                //Output_PictureBox.Image.Save($"{ExportName}.png", ImageFormat.Png);
+
+                string fontName = (UsingCustomFont) ? Path.GetFileNameWithoutExtension(CustomFontName) : SystemFontName;
+
+                if (ExportFormatComboBox.SelectedIndex == 0) // Text
+                {
+                    StreamWriter writer = new StreamWriter($"{ExportName}.txt");
+
+                    if ((bool)IncludeFontNameCheckBox.IsChecked) writer.WriteLine($"FONTNAME={fontName}");
+                    if ((bool)IncludeGlyphSpacingCheckBox.IsChecked) writer.WriteLine($"SPACING={FontSpacing}");
+                    if ((bool)IncludeGlyphRangeCheckBox.IsChecked)
+                    {
+                        writer.WriteLine($"FIRSTGLYPH={FirstGlyph}");
+                        writer.WriteLine($"LASTGLYPH={LastGlyph}");
+                    }
+
+                    foreach (GlyphInfo glyphInfo in Glyphs)
+                    {
+                        if (glyphInfo.Include && glyphInfo.CharCode != 127)
+                        {
+                            writer.WriteLine($"GLYPH={glyphInfo.CharCode},{glyphInfo.X + 1},{glyphInfo.Y + 1},{glyphInfo.Width - 2},{glyphInfo.Height - 2}");
+                        }
+                    }
+
+                    writer.Close();
+
+                    //Debug.WriteLine("exported text");
+                }
+                else // JSON
+                {
+                    StreamWriter writer = new StreamWriter($"{ExportName}.json");
+
+                    writer.WriteLine("{");
+                    if ((bool)IncludeFontNameCheckBox.IsChecked) writer.WriteLine($"  \"FontName\": \"{fontName}\",");
+                    if ((bool)IncludeGlyphSpacingCheckBox.IsChecked) writer.WriteLine($"  \"GlyphSpacing\": {FontSpacing},");
+                    if ((bool)IncludeGlyphRangeCheckBox.IsChecked)
+                    {
+                        writer.WriteLine($"  \"FirstGlyph\": {FirstGlyph},");
+                        writer.WriteLine($"  \"LastGlyph\": {LastGlyph},");
+                    }
+                    writer.WriteLine($"  \"Glyphs\":[");
+
+                    // Create temp list because we need to bugger about with the last glyph exported
+                    List<GlyphInfo> tempGlyphs = new List<GlyphInfo>();
+                    foreach (GlyphInfo glyphInfo in Glyphs)
+                    {
+                        if (glyphInfo.Include && glyphInfo.CharCode != 127) tempGlyphs.Add(glyphInfo);
+                    }
+
+                    for (int i = 0; i < tempGlyphs.Count - 1; i++)
+                    {
+                        var tempGlyph = tempGlyphs[i];
+                        writer.WriteLine("    {");
+                        writer.WriteLine($"      \"CharCode\": {tempGlyph.CharCode},");
+                        writer.WriteLine($"      \"X\": {tempGlyph.X + 1},");
+                        writer.WriteLine($"      \"Y\": {tempGlyph.Y + 1},");
+                        writer.WriteLine($"      \"W\": {tempGlyph.Width - 2},");
+                        writer.WriteLine($"      \"H\": {tempGlyph.Height - 2}");
+                        writer.WriteLine("    },");
+                    }
+
+                    var lastGlyph = tempGlyphs[tempGlyphs.Count - 1];
+                    writer.WriteLine("    {");
+                    writer.WriteLine($"      \"CharCode\": {lastGlyph.CharCode},");
+                    writer.WriteLine($"      \"X\": {lastGlyph.X + 1},");
+                    writer.WriteLine($"      \"Y\": {lastGlyph.Y + 1},");
+                    writer.WriteLine($"      \"W\": {lastGlyph.Width - 2},");
+                    writer.WriteLine($"      \"H\": {lastGlyph.Height - 2}");
+                    writer.WriteLine("    }"); // << The buggery bit where we need to omit the final comma
+
+                    writer.WriteLine("  ]");
+                    writer.WriteLine("}");
+
+                    writer.Close();
+
+                    //Debug.WriteLine("exported json");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log($"Export(){Environment.NewLine}{ex}");
+                throw;
+            }
+        }
+        else
+        {
+            ExportProjectAs();
+        }
     }
-    private void ExportProjectAs()
+    private async Task ExportProjectAs()
     {
         Log("ExportProjectAs()");
+
+        if (CustomFontName == null && SystemFontName == null) return;
+
+        var dialog = new SaveFileDialog();
+
+        dialog.Filters.Add(new FileDialogFilter() { Name = "Exported Files", Extensions = { "json", "txt" } });
+
+        dialog.Title = "Export Project As";
+
+        var fileName = await dialog.ShowAsync(this);
+
+        if (fileName != null)
+        {
+            ExportName = fileName;
+            ExportProject();
+        }
     }
 
     public static void OpenBrowser(string url)
@@ -950,8 +1059,6 @@ public partial class MainWindow : Window
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
             Process.Start(new ProcessStartInfo { FileName = $"{url}", UseShellExecute = true });
-
-            //Process.Start(new ProcessStartInfo("cmd", $"/c start {url}"));
         }
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
@@ -965,8 +1072,6 @@ public partial class MainWindow : Window
         {
         }
     }
-
-
     private void ExportFormatdComboBox_SelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
         if (UpdatingForm || ExportFormatdComboBox.SelectedIndex == -1) return;
