@@ -1,0 +1,36 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="130"
+        x:Class="FontAppX.AboutWindow"
+		ExtendClientAreaToDecorationsHint="True"
+		ExtendClientAreaChromeHints="NoChrome"
+		ExtendClientAreaTitleBarHeightHint="0"
+        Title="AboutWindow"
+		Width="400"
+		Height="130">
+	
+	<Window.Styles>
+		<Style Selector="Button">
+			<Setter Property="Margin" Value="0,0,3,3"></Setter>
+		</Style>
+	</Window.Styles>
+
+	<Border BorderBrush="Black" BorderThickness="1">
+		<Grid ColumnDefinitions="90, *" RowDefinitions="*, Auto">
+			<Image x:Name="AboutLogo" Width="56" Height="56" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"></Image>
+			<StackPanel Grid.Column="1" Grid.Row="0" VerticalAlignment="Center">
+				<Label Padding="0,20,0,0">FontApp v1.0.0</Label>
+				<Label Margin="0,2,0,0">(C) 2023 Cliff Earl, Antix Development</Label>
+				<Button Height="20" Padding="0" x:Name="HomePageButton" Foreground="Blue" Background="White">Visit homepage</Button>
+				<Button Height="20" Padding="0" x:Name="SponsorPageButton" Foreground="Blue" Background="White">Buy Cliff a coffee</Button>
+			</StackPanel>
+			<Grid Grid.Column="1" Grid.Row="1">
+				<Button x:Name="OkayButton" Width="80" Grid.Column="0" HorizontalAlignment="Right" HorizontalContentAlignment="Center">Okay</Button>
+			</Grid>
+		</Grid>
+
+	</Border>
+
+</Window>

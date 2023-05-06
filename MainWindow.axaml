@@ -1,0 +1,225 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="710"
+		xmlns:controls="using:FontAppX.Controls"
+        x:Class="FontAppX.MainWindow"
+		Title="FontAppX"
+		Icon="/Assets/FontApp.ico"
+		Width="800"
+		Height="700"
+		MinWidth="800"
+		MinHeight="710">
+
+	<Window.Styles>
+		
+		<Style Selector="ListBoxItem">
+			<Setter Property="Height" Value="24"></Setter>
+			<Setter Property="Margin" Value="0,0,0,0"></Setter>
+			<Setter Property="Padding" Value="3,0,0,0"></Setter>
+			<Setter Property="VerticalContentAlignment" Value="Center"></Setter>
+		</Style>
+
+		<Style Selector="ComboBox, NumericUpDown, Button, CheckBox, ListBox">
+			<Setter Property="Margin" Value="3,0,3,0"></Setter>
+		</Style>
+
+		<Style Selector="ScrollViewer">
+			<Setter Property="Margin" Value="0,2,3,3"></Setter>
+		</Style>
+
+		<Style Selector="ComboBoxItem">
+			<Setter Property="Height" Value="23"></Setter>
+			<Setter Property="Margin" Value="0,0,0,0"></Setter>
+			<Setter Property="Padding" Value="0"></Setter>
+			<Setter Property="HorizontalContentAlignment" Value="Center"></Setter>
+			<Setter Property="VerticalContentAlignment" Value="Center"></Setter>
+		</Style>
+
+		<Style Selector="ComboBox">
+			<Setter Property="HorizontalContentAlignment" Value="Center"></Setter>
+			<Setter Property="Margin" Value="3,2,3,2"></Setter>
+
+		</Style>
+
+		<Style Selector="Label">
+			<Setter Property="Height" Value="24"></Setter>
+			<Setter Property="HorizontalAlignment" Value="Center"></Setter>
+			<Setter Property="VerticalContentAlignment" Value="Center"></Setter>
+		</Style>
+		
+	</Window.Styles>
+
+	<!-- Content -->
+	<Grid RowDefinitions="Auto, *">
+
+		<!-- Menu bar -->
+			<Menu>
+				<MenuItem Header="_File">
+					<MenuItem x:Name="NewProjectMenuItem" Header="New" HotKey="Ctrl+N" InputGesture="Ctrl+N"/>
+					<MenuItem x:Name="OpenProjectMenuItem" Header="Open" HotKey="Ctrl+O" InputGesture="Ctrl+O"/>
+					<Separator/>
+					<MenuItem x:Name="SaveProjectMenuItem" Header="Save" HotKey="Ctrl+S" InputGesture="Ctrl+S"/>
+					<MenuItem x:Name="SaveProjectAsMenuItem" Header="Save As" HotKey="Ctrl+Shift+S" InputGesture="Ctrl+Shift+S"/>
+					<Separator/>
+					<MenuItem x:Name="ExitFontAppMenuItem" Header="Exit" HotKey="Alt+F4" InputGesture="Alt+F4"/>
+				</MenuItem>
+				<MenuItem Header="_Tools">
+					<MenuItem x:Name="ExportProjectMenuItem" Header="Export" HotKey="Ctrl+E" InputGesture="Ctrl+E"/>
+					<MenuItem x:Name="ExportProjectAsMenuItem" Header="Export As" HotKey="Ctrl+Shift+E" InputGesture="Ctrl+Shift+E"/>
+				</MenuItem>
+				<MenuItem Header="Help">
+					<MenuItem x:Name="AboutFontAppMenuItem" Header="About" HotKey="F1" InputGesture="F1"/>
+				</MenuItem>
+			</Menu>
+		
+		<!-- Main Area -->
+		<Grid ColumnDefinitions="250, *" Grid.Row="1">
+
+			<!-- Left hand pane -->
+			<StackPanel>
+
+				<!-- Font Selection -->
+				<Label Height="34">System Fonts</Label>
+				<ListBox x:Name="SystemFontListBox" Grid.Column="0" HorizontalAlignment="Stretch" MaxHeight="180" BorderThickness="1" CornerRadius="2"/>
+				<Label>Custom Font</Label>
+				<Grid ColumnDefinitions="*, auto">
+					<Button x:Name="CustomFontNameButton" Grid.Column="0" BorderThickness="1" BorderBrush="Black" CornerRadius="2" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Background="WhiteSmoke">custom fontname</Button>
+					<Button x:Name="ChooseCustomFontButton" Grid.Column="1">...</Button>
+				</Grid>
+
+				<!-- Font Options -->
+				<Label>Font Options</Label>
+				<Grid ColumnDefinitions="1*, 1*" RowDefinitions="Auto, Auto">
+					<Label Grid.Column="0" Grid.Row="0">Height</Label>
+					<Label Grid.Column="1" Grid.Row="0">Spacing</Label>
+					<NumericUpDown x:Name="FontHeightNumericUpDown" Grid.Column="0" Grid.Row="1" Minimum="6" Maximum="256" ClipValueToMinMax="True" HorizontalAlignment="Stretch"></NumericUpDown>
+					<NumericUpDown x:Name="FontSpacingNumericUpDown" Grid.Column="1" Grid.Row="1" Minimum="0" Maximum="10" ClipValueToMinMax="True" HorizontalAlignment="Stretch"></NumericUpDown>
+				</Grid>
+
+				<!-- Font Style / Smoothing Mode -->
+				<Grid ColumnDefinitions="1*, 1*" RowDefinitions="Auto, Auto">
+					<Label Grid.Column="0" Grid.Row="0">Style</Label>
+					<Label Grid.Column="1" Grid.Row="0">Smoothing</Label>
+
+					<ComboBox x:Name="FontStyleComboBox" HorizontalAlignment="Stretch" SelectedIndex="0" Grid.Column="0" Grid.Row="1">
+						<ComboBoxItem>Regular</ComboBoxItem>
+						<ComboBoxItem>Bold</ComboBoxItem>
+						<ComboBoxItem>Italic</ComboBoxItem>
+						<ComboBoxItem>Bold + Italic</ComboBoxItem>
+					</ComboBox>
+
+					<ComboBox x:Name="SmoothingModeComboBox" HorizontalAlignment="Stretch" SelectedIndex="0" Grid.Column="1" Grid.Row="1">
+						<ComboBoxItem>Pixelated</ComboBoxItem>
+						<ComboBoxItem>Antialiased</ComboBoxItem>
+					</ComboBox>
+				</Grid>
+
+				<!-- Outline Width -->
+				<Grid ColumnDefinitions="125, 125" RowDefinitions="Auto, Auto">
+					<Label Grid.Column="0" Grid.Row="0">Outline Width</Label>
+					<NumericUpDown x:Name="OutlineWidthNumericUpDown" Grid.Column="0" Grid.Row="1" Minimum="0" Maximum="10" ClipValueToMinMax="True"></NumericUpDown>
+				</Grid>
+				
+				<!-- Fill Color / Outline Color -->
+				<Grid ColumnDefinitions="1*, 1*" RowDefinitions="Auto, 30">
+					
+					<Label Grid.Column="0" Grid.Row="0">Fill Color</Label>
+					<Label Grid.Column="1" Grid.Row="0">Outline Color</Label>
+
+					<Button x:Name="FillColorButton" Grid.Column="0" Grid.Row="1" HorizontalContentAlignment="Center" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" BorderThickness="1" BorderBrush="Black">
+						<Button.Flyout>
+							<Flyout Placement="Top">
+								<Grid Width="300" ColumnDefinitions="24, *" RowDefinitions="Auto, Auto, Auto">
+									<Label Grid.Column="0" Grid.Row="0" VerticalContentAlignment="Center">R</Label>
+									<Slider x:Name="FillColorRedSlider" Grid.Column="1" Grid.Row="0" Value="0" Minimum="0" Maximum="255" Foreground="Red"/>
+									<Label Grid.Column="0" Grid.Row="1" VerticalContentAlignment="Center">G</Label>
+									<Slider x:Name="FillColorGreenSlider" Grid.Column="1" Grid.Row="1" Value="0" Minimum="0" Maximum="255" Foreground="Green"/>
+									<Label Grid.Column="0" Grid.Row="2" VerticalContentAlignment="Center">B</Label>
+									<Slider x:Name="FillColorBlueSlider" Grid.Column="1" Grid.Row="2" Value="0" Minimum="0" Maximum="255" Foreground="Blue"/>
+								</Grid>
+							</Flyout>
+						</Button.Flyout>
+					</Button>
+
+					<Button x:Name="OutlineColorButton" Grid.Column="1" Grid.Row="1" HorizontalContentAlignment="Center" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" BorderThickness="1" BorderBrush="Black">
+						<Button.Flyout>
+							<Flyout Placement="Top">
+								<Grid Width="300" ColumnDefinitions="24, *" RowDefinitions="Auto, Auto, Auto">
+									<Label Grid.Column="0" Grid.Row="0" VerticalContentAlignment="Center">R</Label>
+									<Slider x:Name="OutlineColorRedSlider" Grid.Column="1" Grid.Row="0" Value="0" Minimum="0" Maximum="255" Foreground="Red"/>
+									<Label Grid.Column="0" Grid.Row="1" VerticalContentAlignment="Center">G</Label>
+									<Slider x:Name="OutlineColorGreenSlider" Grid.Column="1" Grid.Row="1" Value="0" Minimum="0" Maximum="255" Foreground="Green"/>
+									<Label Grid.Column="0" Grid.Row="2" VerticalContentAlignment="Center">B</Label>
+									<Slider x:Name="OutlineColorBlueSlider" Grid.Column="1" Grid.Row="2" Value="0" Minimum="0" Maximum="255" Foreground="Blue"/>
+								</Grid>
+							</Flyout>
+						</Button.Flyout>
+					</Button>
+				</Grid>
+
+				<!-- Export Options -->
+				<Label>Export Options</Label>
+				<Grid ColumnDefinitions="130, 120" RowDefinitions="Auto, Auto, Auto, Auto">
+					<Label Grid.Column="0" Grid.Row="0">Include Fields</Label>
+					<Label Grid.Column="1" Grid.Row="0">Format</Label>
+					<ComboBox x:Name="ExportFormatComboBox" SelectedIndex="0" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Stretch">
+						<ComboBoxItem>Text</ComboBoxItem>
+						<ComboBoxItem>JSON</ComboBoxItem>
+					</ComboBox>
+					<CheckBox x:Name="IncludeFontNameCheckBox" Grid.Column="0" Grid.Row="1">Font Name</CheckBox>
+					<CheckBox x:Name="IncludeGlyphRangeCheckBox" Grid.Column="0" Grid.Row="2">Glyph Range</CheckBox>
+					<CheckBox x:Name="IncludeGlyphSpacingCheckBox" Grid.Column="0" Grid.Row="3">Glyph Spacing</CheckBox>
+				</Grid>
+				<!-- Export Options-->
+				
+			</StackPanel>
+
+			<!-- Right hand pane-->
+			<Grid Grid.Column="1" RowDefinitions="34, 180, 34, *">
+				
+				<Grid Grid.Row="0" ColumnDefinitions="*, Auto, Auto">
+					<Label Grid.Column="0">Glyphs to Include or Exclude</Label>
+					<Button x:Name="IncludeAllGlyphsButton" Grid.Column="1" Width="60" HorizontalContentAlignment="Center">All</Button>
+					<Button x:Name="ExcludeAllGlyphsButton" Grid.Column="2" Width="60" HorizontalContentAlignment="Center">None</Button>
+				</Grid>
+
+				<Grid Grid.Row="1" Margin="0,0,3,0" x:Name="GlyphSelectionGrid" Height="180" ColumnDefinitions="1*, 1*, 1*, 1*, 1*, 1*, 1*, 1*, 1*, 1*, 1*, 1*, 1*, 1*, 1*, 1*" RowDefinitions="1*, 1*, 1*, 1*, 1*, 1*"/>
+
+				<Grid Grid.Row="2" ColumnDefinitions="*, Auto, Auto">
+					<Label Grid.Column="0">Glyph Atlas</Label>
+
+					<Button x:Name="AtlasColorButton" Grid.Column="1" Grid.Row="1" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Width="90" Margin="0,3,0,3" Padding="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" BorderThickness="1" BorderBrush="Black">
+						<Button.Flyout>
+							<Flyout Placement="Top">
+								<Grid Width="300" ColumnDefinitions="24, *" RowDefinitions="Auto, Auto, Auto">
+									<Label Grid.Column="0" Grid.Row="0" VerticalContentAlignment="Center">R</Label>
+									<Slider x:Name="AtlasColorRedSlider" Grid.Column="1" Grid.Row="0" Value="0" Minimum="0" Maximum="255" Foreground="Red"/>
+									<Label Grid.Column="0" Grid.Row="1" VerticalContentAlignment="Center">G</Label>
+									<Slider x:Name="AtlasColorGreenSlider" Grid.Column="1" Grid.Row="1" Value="0" Minimum="0" Maximum="255" Foreground="Green"/>
+									<Label Grid.Column="0" Grid.Row="2" VerticalContentAlignment="Center">B</Label>
+									<Slider x:Name="AtlasColorBlueSlider" Grid.Column="1" Grid.Row="2" Value="0" Minimum="0" Maximum="255" Foreground="Blue"/>
+								</Grid>
+							</Flyout>
+						</Button.Flyout>
+					</Button>
+
+					<ComboBox x:Name="ExportFormatdComboBox" SelectedIndex="0" Grid.Column="2" Grid.Row="1" HorizontalAlignment="Stretch">
+						<ComboBoxItem>1X</ComboBoxItem>
+						<ComboBoxItem>2X</ComboBoxItem>
+						<ComboBoxItem>4X</ComboBoxItem>
+						<ComboBoxItem>8X</ComboBoxItem>
+					</ComboBox>
+
+				</Grid>
+
+				<ScrollViewer Grid.Row="3" x:Name="GlyphAtlasCanvasContainer" Background="DimGray" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible"/>
+		
+			</Grid>
+
+		</Grid>
+
+	</Grid>
+
+</Window>
