@@ -14,8 +14,9 @@ namespace FontAppX;
 
 public partial class DrawableCanvas : UserControl
 {
-    class RenderingLogic : ICustomDrawOperation
+    public class RenderingLogic : ICustomDrawOperation
     {
+        public SKSurface Surface;
         public Action<SKCanvas> RenderCall;
 
         public Rect Bounds { get; set; }
@@ -28,6 +29,9 @@ public partial class DrawableCanvas : UserControl
 
         public void Render(IDrawingContextImpl context)
         {
+            Surface = (context as ISkiaDrawingContextImpl)?.SkSurface;
+
+
             var canvas = (context as ISkiaDrawingContextImpl)?.SkCanvas;
             if (canvas != null) Render(canvas);
         }
@@ -35,7 +39,7 @@ public partial class DrawableCanvas : UserControl
         private void Render(SKCanvas canvas) => RenderCall?.Invoke(canvas);
     }
 
-    RenderingLogic renderingLogic;
+    public RenderingLogic renderingLogic;
 
     public event Action<SKCanvas> RenderSkia;
 

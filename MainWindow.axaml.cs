@@ -89,7 +89,10 @@ public partial class MainWindow : Window
 
     DrawableCanvas GlyphAtlas;
     DrawableCanvas ZoomedGlyphAtlas;
+    SKBitmap GlyphAtlasBitmap;
+    SKImage GlyphAtlasImage;
 
+    SKCanvas GlyphAtlasCanvas;
 
     Bitmap AboutLogoBitmap = new Bitmap("Assets/FontApp.png");
 
@@ -108,6 +111,8 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+
+        Log($"{MinWidth}, {MinHeight}");
 
         Closing += MainWindow_Closing;
         Opened += MainWindow_Opened;
@@ -218,6 +223,8 @@ public partial class MainWindow : Window
     /// <param name="e"></param>
     private void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
     {
+        GlyphAtlasImage?.Dispose();
+        GlyphAtlasBitmap?.Dispose();
         AboutLogoBitmap?.Dispose();
         FillPaint?.Dispose();
         StrokePaint?.Dispose();
@@ -937,13 +944,70 @@ public partial class MainWindow : Window
             SaveProjectAs();
         }
     }
-
     private void ExportProject()
     {
         if (ExportName != null)
         {
             try
             {
+                var p = new Image();
+
+                Log($"{ExportName}.png");
+
+                var surface = GlyphAtlas.renderingLogic.Surface;
+
+                var s = SKSurface.Create(new SKImageInfo(AtlasWidth, AtlasHeight));
+
+
+                var c = s.Canvas;
+
+                c.Clear(SKColors.Purple);
+
+                surface.Draw(c, 0, 0, new SKPaint());
+
+                var fs = new FileStream($"{ExportName}.png", FileMode.Create);
+                var img = s.Snapshot();
+                var d = img.Encode();
+
+                d.SaveTo(fs);
+
+                d.Dispose();
+                img.Dispose();
+                fs.Dispose();
+                s.Dispose();
+
+
+                //var surface = GlyphAtlas.renderingLogic.Surface;
+                //var pngEncoder = new SKPngEncoderOptions(SKPngEncoderFilterFlags.NoFilters, 50);
+                //var pixMap = surface.PeekPixels();
+                //var pixMapData = pixMap.Encode(pngEncoder);
+                //var pixMapStream = new FileStream($"{ExportName}.png", FileMode.Create);
+                //pixMapData.SaveTo(pixMapStream);
+                //pixMapData.Dispose();
+                //pixMapStream?.Dispose();
+                //pixMap.Dispose();
+
+
+
+
+
+                //var image = surface.Snapshot();
+                //Log($"image:{image.ToString()}");
+
+                //var data = image.Encode();// SKEncodedImageFormat.Png, 100);// ;
+                //Log($"data:{data.ToString()}");
+
+                //var stream = new FileStream($"{ExportName}.png", FileMode.Create);
+                //Log($"stream:{stream.ToString()}");
+
+                //data.SaveTo(stream);
+
+                //stream?.Dispose();
+                //data?.Dispose();
+                //image?.Dispose();
+
+
+
                 //Output_PictureBox.Image.Save($"{ExportName}.png", ImageFormat.Png);
 
                 string fontName = (UsingCustomFont) ? Path.GetFileNameWithoutExtension(CustomFontName) : SystemFontName;
@@ -1053,7 +1117,6 @@ public partial class MainWindow : Window
             ExportProject();
         }
     }
-
     public static void OpenBrowser(string url)
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -1080,8 +1143,6 @@ public partial class MainWindow : Window
 
         Log($"ExportFormatdComboBox_SelectionChanged() {zoomFactor}");
     }
-
-
     /// <summary>
     /// Regenerate the atlas
     /// </summary>
@@ -1154,26 +1215,26 @@ public partial class MainWindow : Window
                     if (OutlineWidth > 0) canvas.DrawText(glyph.AsciiChar, renderX, renderY, StrokePaint);
                 }
             }
-        };
 
-        //GlyphAtlas.PointerPressed += (s, e) => { Log("PointerPressed"); };
-        //GlyphAtlas.PointerReleased += (s, e) => { Log("PointerReleased"); };
-        //GlyphAtlas.PointerMoved += (s, e) =>
-        //{
-        //    Log("PointerMoved");
-        //    var point = e.GetCurrentPoint(GlyphAtlas);
-        //    var x = point.Position.X;
-        //    var y = point.Position.Y;
-        //    if (point.Properties.IsLeftButtonPressed)
-        //    {
-        //        // left button pressed
-        //    }
-        //    if (point.Properties.IsRightButtonPressed)
-        //    {
-        //        // right button pressed
-        //    }
-        //    Log($"x:{x},{y}");
-        //};
+            //canvas.drawcan
+
+            var rl = GlyphAtlas.renderingLogic;
+
+            GlyphAtlasCanvas = canvas;
+
+            GlyphAtlasBitmap?.Dispose();
+            GlyphAtlasBitmap = new SKBitmap(AtlasWidth, AtlasHeight);
+
+            var recorder = new SKPictureRecorder();
+
+
+
+            //canvas.DrawBitmap()
+
+
+
+
+        };
 
         GlyphAtlasCanvasContainer.Content = GlyphAtlas; // Display atlas canvas
         GlyphAtlas.InvalidateVisual();
