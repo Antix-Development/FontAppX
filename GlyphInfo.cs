@@ -23,7 +23,7 @@ namespace FontAppX
         //public int SourceY = 0;
 
         public int DestX = 0;
-        //public int DestY = 0;
+        public int DestY = 0;
 
         public Button GridButton;
 

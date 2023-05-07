@@ -1,22 +1,21 @@
-﻿using Avalonia.Rendering.SceneGraph;
-using Avalonia.Skia;
-using Avalonia;
-using SkiaSharp;
-using System;
+﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Platform;
+using Avalonia.Rendering.SceneGraph;
+using Avalonia.Skia;
+using SkiaSharp;
+using System;
 using System.Diagnostics;
 
 namespace FontAppX;
 
-// This code from https://stackoverflow.com/questions/61627374/is-it-possible-to-create-a-skia-canvas-element-in-an-avalonia-application/74324110#74324110
+// This code modified from code at https://stackoverflow.com/questions/61627374/is-it-possible-to-create-a-skia-canvas-element-in-an-avalonia-application/74324110#74324110
 
 public partial class DrawableCanvas : UserControl
 {
     public class RenderingLogic : ICustomDrawOperation
     {
-        public SKSurface Surface;
         public Action<SKCanvas> RenderCall;
 
         public Rect Bounds { get; set; }
@@ -29,9 +28,6 @@ public partial class DrawableCanvas : UserControl
 
         public void Render(IDrawingContextImpl context)
         {
-            Surface = (context as ISkiaDrawingContextImpl)?.SkSurface;
-
-
             var canvas = (context as ISkiaDrawingContextImpl)?.SkCanvas;
             if (canvas != null) Render(canvas);
         }
@@ -60,7 +56,7 @@ public partial class DrawableCanvas : UserControl
 
     private void DrawableCanvas_Initialized(object? sender, EventArgs e)
     {
-        Debug.WriteLine($"Initiated: {Width},{Height}");
+        Debug.WriteLine($"DrawableCanvas_Initialized() {Width},{Height}");
     }
 
     public override void Render(DrawingContext context)

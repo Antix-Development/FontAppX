@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
+using Avalonia.VisualTree;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
@@ -111,8 +112,6 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-
-        Log($"{MinWidth}, {MinHeight}");
 
         Closing += MainWindow_Closing;
         Opened += MainWindow_Opened;
@@ -950,63 +949,15 @@ public partial class MainWindow : Window
         {
             try
             {
-                var p = new Image();
-
-                Log($"{ExportName}.png");
-
-                var surface = GlyphAtlas.renderingLogic.Surface;
-
-                var s = SKSurface.Create(new SKImageInfo(AtlasWidth, AtlasHeight));
-
-
-                var c = s.Canvas;
-
-                c.Clear(SKColors.Purple);
-
-                surface.Draw(c, 0, 0, new SKPaint());
-
-                var fs = new FileStream($"{ExportName}.png", FileMode.Create);
-                var img = s.Snapshot();
-                var d = img.Encode();
-
-                d.SaveTo(fs);
-
-                d.Dispose();
-                img.Dispose();
-                fs.Dispose();
-                s.Dispose();
-
-
-                //var surface = GlyphAtlas.renderingLogic.Surface;
-                //var pngEncoder = new SKPngEncoderOptions(SKPngEncoderFilterFlags.NoFilters, 50);
-                //var pixMap = surface.PeekPixels();
-                //var pixMapData = pixMap.Encode(pngEncoder);
-                //var pixMapStream = new FileStream($"{ExportName}.png", FileMode.Create);
-                //pixMapData.SaveTo(pixMapStream);
-                //pixMapData.Dispose();
-                //pixMapStream?.Dispose();
-                //pixMap.Dispose();
 
 
 
 
 
-                //var image = surface.Snapshot();
-                //Log($"image:{image.ToString()}");
-
-                //var data = image.Encode();// SKEncodedImageFormat.Png, 100);// ;
-                //Log($"data:{data.ToString()}");
-
-                //var stream = new FileStream($"{ExportName}.png", FileMode.Create);
-                //Log($"stream:{stream.ToString()}");
-
-                //data.SaveTo(stream);
-
-                //stream?.Dispose();
-                //data?.Dispose();
-                //image?.Dispose();
-
-
+                var renderBitmap = new RenderTargetBitmap(new PixelSize((int)GlyphAtlas.Bounds.Width, (int)GlyphAtlas.Bounds.Height));
+                renderBitmap.Render(GlyphAtlas);
+                renderBitmap.Save($"{ExportName}.png");
+                renderBitmap.Dispose();
 
                 //Output_PictureBox.Image.Save($"{ExportName}.png", ImageFormat.Png);
 
@@ -1163,14 +1114,13 @@ public partial class MainWindow : Window
         StrokePaint.Color = OutlineColor;
         StrokePaint.StrokeWidth = OutlineWidth;
 
-        var metrics = (OutlineWidth > 0) ? StrokePaint.FontMetrics : FillPaint.FontMetrics;
-        var glyphRenderY = (int)Math.Abs(metrics.Ascent) - Math.Abs(metrics.Descent); // Calculate baseline
-        //Log($"metrics: ascent:{m.Ascent} descent:{m.Descent} top:{m.Top} bottom:{m.Bottom}");
-
         UpdateTextBounds("!#$%&'()*+,-./0125456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~");
-        var glyphHeight = (int)TextBounds.Height + 2; // Height of tallest glyph
-        //Log($"AllChars:{TextBounds} Left:{TextBounds.Left} Top:{TextBounds.Top} Right:{TextBounds.Right} Bottom:{TextBounds.Bottom} Location:{TextBounds.Location}");
 
+        var glyphHeight = (int)TextBounds.Height; // Height of tallest glyph
+        var glyphBaseline = (int)Math.Abs(TextBounds.Bottom);
+
+        //Log($"AllChars:{TextBounds} Left:{TextBounds.Left} Top:{TextBounds.Top} Right:{TextBounds.Right} Bottom:{TextBounds.Bottom} Location:{TextBounds.Location}");
+        
         for (int i = 0; i < LastGlyph - FirstGlyph + 1; i++)
         {
             var glyph = Glyphs[i];
@@ -1179,13 +1129,14 @@ public partial class MainWindow : Window
             {
                 UpdateTextBounds(glyph.AsciiChar);
 
-                Log($"{glyph.AsciiChar}:{-TextBounds.Left} {TextBounds} Left:{TextBounds.Left} Top:{TextBounds.Top} Right:{TextBounds.Right} Bottom:{TextBounds.Bottom} Location:{TextBounds.Location}");
+                //Log($"{glyph.AsciiChar} {TextBounds.Top + TextBounds.Height} Left:{TextBounds.Left} Top:{TextBounds.Top} Width:{TextBounds.Width} Height:{TextBounds.Height} Bottom:{TextBounds.Bottom} MidY:{TextBounds.MidY}");
 
                 glyph.X = 0;
                 glyph.Y = 0;
                 glyph.Width = (i == 0) ? 8 : (int)TextBounds.Width; // +2 padding
                 glyph.Height = glyphHeight; // +2 padding
                 glyph.DestX = (int)TextBounds.Left;
+                glyph.DestY = glyphHeight - glyphBaseline;
             }
         }
 
@@ -1209,36 +1160,25 @@ public partial class MainWindow : Window
 
                 if (glyph.Include)
                 {
+                    //var paint = new SKPaint{Color = new SKColor((byte)rng.Next(255), (byte)rng.Next(255), (byte)rng.Next(255)), Style = SKPaintStyle.Fill};
+                    //canvas.DrawRect(glyph.X, glyph.Y, glyph.Width, glyph.Height, paint);
+                    //FillPaint.Dispose();
+
                     var renderX = glyph.X - glyph.DestX + 1;
-                    var renderY = glyph.Y + glyphRenderY + 1;
+                    var renderY = glyph.Y + glyph.DestY + 1;
+
                     canvas.DrawText(glyph.AsciiChar, renderX, renderY, FillPaint);
+
                     if (OutlineWidth > 0) canvas.DrawText(glyph.AsciiChar, renderX, renderY, StrokePaint);
                 }
             }
-
-            //canvas.drawcan
-
-            var rl = GlyphAtlas.renderingLogic;
-
-            GlyphAtlasCanvas = canvas;
-
-            GlyphAtlasBitmap?.Dispose();
-            GlyphAtlasBitmap = new SKBitmap(AtlasWidth, AtlasHeight);
-
-            var recorder = new SKPictureRecorder();
-
-
-
-            //canvas.DrawBitmap()
-
-
-
-
         };
 
         GlyphAtlasCanvasContainer.Content = GlyphAtlas; // Display atlas canvas
         GlyphAtlas.InvalidateVisual();
     }
+    //private Random rng = new Random();
+
     private void UpdateTextBounds(string s)
     {
         if (OutlineWidth > 0) // Results will differ whether outlined or not
