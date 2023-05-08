@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace FontAppX;
@@ -111,19 +112,29 @@ public partial class MainWindow : Window
         FillColorRedSlider.GetPropertyChangedObservable(Slider.ValueProperty).AddClassHandler<Slider>((t, args) => FillColorRedSlider_PropertyChanged());
         FillColorGreenSlider.GetPropertyChangedObservable(Slider.ValueProperty).AddClassHandler<Slider>((t, args) => FillColorGreenSlider_PropertyChanged());
         FillColorBlueSlider.GetPropertyChangedObservable(Slider.ValueProperty).AddClassHandler<Slider>((t, args) => FillColorBlueSlider_PropertyChanged());
+        FillColorButton.Click += FillColorButton_Click;
+        FillColorButton.Flyout.Closed += ColorButtonFlyout_Closed;
+        FillColorTextBox.KeyDown += ColorTextBox_KeyDown;
+        FillColorTextBox.KeyUp += FillColorTextBox_KeyUp;
 
         OutlineColorRedSlider.GetPropertyChangedObservable(Slider.ValueProperty).AddClassHandler<Slider>((t, args) => OutlineColorRedSlider_PropertyChanged());
         OutlineColorGreenSlider.GetPropertyChangedObservable(Slider.ValueProperty).AddClassHandler<Slider>((t, args) => OutlineColorGreenSlider_PropertyChanged());
         OutlineColorBlueSlider.GetPropertyChangedObservable(Slider.ValueProperty).AddClassHandler<Slider>((t, args) => OutlineColorBlueSlider_PropertyChanged());
-
+        OutlineColorButton.Click += OutlineColorButton_Click;
         OutlineColorButton.Flyout.Closed += ColorButtonFlyout_Closed;
-        FillColorButton.Flyout.Closed += ColorButtonFlyout_Closed;
+        OutlineColorTextBox.KeyDown += ColorTextBox_KeyDown;
+        OutlineColorTextBox.KeyUp += OutlineColorTextBox_KeyUp;
 
         AtlasColorRedSlider.GetPropertyChangedObservable(Slider.ValueProperty).AddClassHandler<Slider>((t, args) => AtlasColorRedSlider_PropertyChanged());
         AtlasColorGreenSlider.GetPropertyChangedObservable(Slider.ValueProperty).AddClassHandler<Slider>((t, args) => AtlasColorGreenSlider_PropertyChanged());
         AtlasColorBlueSlider.GetPropertyChangedObservable(Slider.ValueProperty).AddClassHandler<Slider>((t, args) => AtlasColorBlueSlider_PropertyChanged());
+        AtlasColorButton.Click += AtlasColorButton_Click;
+        AtlasColorButton.Flyout.Closed += ColorButtonFlyout_Closed;
+        AtlasColorTextBox.KeyDown += ColorTextBox_KeyDown;
+        AtlasColorTextBox.KeyUp += AtlasColorTextBox_KeyUp;
 
-        AtlasColorButton.Flyout.Closed += AtlasButtonFlyout_Closed;
+
+
 
         NewProjectMenuItem.Click += NewProjectMenuItem_Click;
         OpenProjectMenuItem.Click += OpenProjectMenuItem_Click;
@@ -134,6 +145,8 @@ public partial class MainWindow : Window
         ExportProjectAsMenuItem.Click += ExportProjectAsMenuItem_Click;
         AboutFontAppMenuItem.Click += AboutFontAppMenuItem_Click;
     }
+
+
     /// <summary>
     /// Initialize application
     /// </summary>
@@ -318,6 +331,7 @@ public partial class MainWindow : Window
         }
         DoTheMagic();
     }
+    #endregion
 
     #region Fill and outline color sliders
     private void UpdateFillColor()
@@ -328,6 +342,7 @@ public partial class MainWindow : Window
         FillColorButton.Foreground = new SolidColorBrush(Color.Parse($"#{fillColorBackground}"));
         FillColorButton.Background = new SolidColorBrush(Color.Parse($"#{fillColorForeground}"));
         FillColorButton.Content = fillColorForeground;
+        FillColorTextBox.Text = fillColorBackground;
     }
     private void UpdateOutlineColor()
     {
@@ -337,6 +352,19 @@ public partial class MainWindow : Window
         OutlineColorButton.Foreground = new SolidColorBrush(Color.Parse($"#{OutlineColorBackground}"));
         OutlineColorButton.Background = new SolidColorBrush(Color.Parse($"#{OutlineColorForeground}"));
         OutlineColorButton.Content = OutlineColorForeground;
+        OutlineColorTextBox.Text = OutlineColorBackground;
+    }
+    private void UpdateAtlasColor()
+    {
+        var AtlasColorForeground = GetColorString(AtlasColorR, AtlasColorG, AtlasColorB);
+        var AtlasColorBackground = GetInvertedColorString(AtlasColorR, AtlasColorG, AtlasColorB);
+        var atlasColor = new SolidColorBrush(Color.Parse($"#{AtlasColorForeground}"));
+        AtlasBackgroundColor = SKColor.Parse($"#{AtlasColorForeground}");
+        AtlasColorButton.Foreground = new SolidColorBrush(Color.Parse($"#{AtlasColorBackground}"));
+        AtlasColorButton.Background = atlasColor;
+        AtlasColorButton.Content = AtlasColorForeground;
+        GlyphAtlasCanvasContainer.Background = atlasColor;
+        AtlasColorTextBox.Text = AtlasColorBackground;
     }
     private void FillColorRedSlider_PropertyChanged()
     {
@@ -347,7 +375,6 @@ public partial class MainWindow : Window
         {
             FillColorR = value;
             UpdateFillColor();
-            //DoTheMagic();
         }
     }
     private void FillColorGreenSlider_PropertyChanged()
@@ -359,7 +386,6 @@ public partial class MainWindow : Window
         {
             FillColorG = value;
             UpdateFillColor();
-            //DoTheMagic();
         }
     }
     private void FillColorBlueSlider_PropertyChanged()
@@ -371,7 +397,6 @@ public partial class MainWindow : Window
         {
             FillColorB = value;
             UpdateFillColor();
-            //DoTheMagic();
         }
     }
     private void OutlineColorRedSlider_PropertyChanged()
@@ -383,7 +408,6 @@ public partial class MainWindow : Window
         {
             OutlineColorR = value;
             UpdateOutlineColor();
-            //DoTheMagic();
         }
     }
     private void OutlineColorGreenSlider_PropertyChanged()
@@ -395,7 +419,6 @@ public partial class MainWindow : Window
         {
             OutlineColorG = value;
             UpdateOutlineColor();
-            //DoTheMagic();
         }
     }
     private void OutlineColorBlueSlider_PropertyChanged()
@@ -407,22 +430,7 @@ public partial class MainWindow : Window
         {
             OutlineColorB = value;
             UpdateOutlineColor();
-            //DoTheMagic();
         }
-    }
-    #endregion
-
-    #region Atlas Background Color
-    private void UpdateAtlasColor()
-    {
-        var AtlasColorForeground = GetColorString(AtlasColorR, AtlasColorG, AtlasColorB);
-        var AtlasColorBackground = GetInvertedColorString(AtlasColorR, AtlasColorG, AtlasColorB);
-        var atlasColor = new SolidColorBrush(Color.Parse($"#{AtlasColorForeground}"));
-        AtlasBackgroundColor = SKColor.Parse($"#{AtlasColorForeground}");
-        AtlasColorButton.Foreground = new SolidColorBrush(Color.Parse($"#{AtlasColorBackground}"));
-        AtlasColorButton.Background = atlasColor;
-        AtlasColorButton.Content = AtlasColorForeground;
-        GlyphAtlasCanvasContainer.Background = atlasColor;
     }
     private void AtlasColorRedSlider_PropertyChanged()
     {
@@ -460,12 +468,79 @@ public partial class MainWindow : Window
             //DoTheMagic();
         }
     }
-    private void AtlasButtonFlyout_Closed(object? sender, EventArgs e) => Log("AtlasButtonFlyout_Closed()");
-    #endregion
-
+    private void FillColorButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e) => FillColorTextBox.Text = $"{FillColorR.ToString("X2")}{FillColorG.ToString("X2")}{FillColorB.ToString("X2")}";
+    private void OutlineColorButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e) => OutlineColorTextBox.Text = $"{OutlineColorR.ToString("X2")}{OutlineColorG.ToString("X2")}{OutlineColorB.ToString("X2")}";
+    private void AtlasColorButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e) => AtlasColorTextBox.Text = $"{AtlasColorR.ToString("X2")}{AtlasColorG.ToString("X2")}{AtlasColorB.ToString("X2")}";
+    private void FillColorTextBox_KeyUp(object? sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Escape)
+        {
+            FillColorButton.Flyout.Hide();
+            return;
+        }
+        if (e.Key == Key.Enter || e.Key == Key.Return)
+        {
+            FillColorButton.Flyout.Hide();
+            var text = FillColorTextBox.Text;
+            if (text.Length == 6)
+            {
+                FillColorR = Convert.ToInt32(text.Substring(0, 2), 16);
+                FillColorG = Convert.ToInt32(text.Substring(2, 2), 16);
+                FillColorB = Convert.ToInt32(text.Substring(4, 2), 16);
+            }
+            UpdateFillColor();
+            DoTheMagic();
+        }
+    }
+    private void OutlineColorTextBox_KeyUp(object? sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Escape)
+        {
+            OutlineColorButton.Flyout.Hide();
+            return;
+        }
+        if (e.Key == Key.Enter || e.Key == Key.Return)
+        {
+            OutlineColorButton.Flyout.Hide();
+            var text = OutlineColorTextBox.Text;
+            if (text.Length == 6)
+            {
+                OutlineColorR = Convert.ToInt32(text.Substring(0, 2), 16);
+                OutlineColorG = Convert.ToInt32(text.Substring(2, 2), 16);
+                OutlineColorB = Convert.ToInt32(text.Substring(4, 2), 16);
+            }
+            UpdateOutlineColor();
+            DoTheMagic();
+        }
+    }
+    private void AtlasColorTextBox_KeyUp(object? sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Escape)
+        {
+            AtlasColorButton.Flyout.Hide();
+            return;
+        }
+        if (e.Key == Key.Enter || e.Key == Key.Return)
+        {
+            AtlasColorButton.Flyout.Hide();
+            var text = AtlasColorTextBox.Text;
+            if (text.Length == 6)
+            {
+                AtlasColorR = Convert.ToInt32(text.Substring(0, 2), 16);
+                AtlasColorG = Convert.ToInt32(text.Substring(2, 2), 16);
+                AtlasColorB = Convert.ToInt32(text.Substring(4, 2), 16);
+            }
+            UpdateAtlasColor();
+            DoTheMagic();
+        }
+    }
+    private void ColorTextBox_KeyDown(object? sender, KeyEventArgs e) // NOTE: Handles all color buttons (FillColorButton, OutlineColorButton, and AtlasColorButton)
+    {
+        if (Regex.IsMatch(e.Key.ToString(), "[^0-9a-fA-F]")) e.Handled = true;
+    }
+    private void ColorButtonFlyout_Closed(object? sender, EventArgs e) => DoTheMagic(); // NOTE: Handles all color buttons (FillColorButton, OutlineColorButton, and AtlasColorButton)
     private string GetInvertedColorString(int r, int g, int b) => $"{0x80 ^ r:X2}{0x80 ^ g:X2}{0x80 ^ b:X2}";
     private string GetColorString(int r, int g, int b) => $"{r & 255:X2}{g & 255:X2}{b & 255:X2}";
-
     /// <summary>
     /// Regenerate atlas if custom font is set
     /// </summary>
@@ -563,10 +638,9 @@ public partial class MainWindow : Window
         // NOTE: Does there actually need to be anything else in here?
         DoTheMagic();
     }
-
     #endregion
 
-    #region Keyboard events
+    #region Keyboard events (menu hotkeys)
     private void MainWindow_KeyDown(object? sender, KeyEventArgs e)
     {
         if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl) CtrlHeld = true;
@@ -825,7 +899,7 @@ public partial class MainWindow : Window
 
         var dialog = new SaveFileDialog();
 
-        dialog.Filters.Add(new FileDialogFilter() { Name = "FontApp Files", Extensions = { "*.*" } });
+        dialog.Filters.Add(new FileDialogFilter() { Name = "FontApp Files", Extensions = { "fap" } });
 
         dialog.Title = "Save Project As";
 
@@ -833,7 +907,8 @@ public partial class MainWindow : Window
 
         if (fileName != null)
         {
-            ProjectName = fileName;
+            ProjectName = (fileName.EndsWith(".fap")) ? fileName.Substring(0, fileName.Length - 4) : fileName;
+
             SaveProject();
         }
     }
@@ -1010,7 +1085,19 @@ public partial class MainWindow : Window
 
         if (fileName != null)
         {
-            ExportName = fileName;
+            if (fileName.EndsWith(".txt"))
+            {
+                ExportName = fileName.Substring(0, fileName.Length - 4);
+            }
+            else if (fileName.EndsWith(".json"))
+            {
+                ExportName = fileName.Substring(0, fileName.Length - 5);
+            }
+            else
+            {
+                ExportName = fileName;
+            }
+
             ExportProject();
         }
     }
@@ -1084,7 +1171,21 @@ public partial class MainWindow : Window
 
         //foreach (var glyph in Glyphs) Log($"{glyph.CharCode}, {glyph.AsciiChar}, {glyph.X}, {glyph.Y} {glyph.Width}, {glyph.Height}");
 
-        GlyphAtlasDisplay = new DrawableCanvas(AtlasWidth, AtlasHeight); // Create the atlas that will be displayed
+        /*
+        Unfortunately at this point we need to get super "kludgey" use two `DrawableCanvas` controls because...
+
+        If we call `canvas.Clear(SKColors.Transparent)`, the area of the canvas will be cleared and we will be abble to see into the desktop!
+        This is because the canvases parent `GlyphAtlasContainer` has already rendered its background, so when the canvas calls `Clear()' the area is nuked.
+
+        The solution requires using one `DrawableCanvas` for displaying which has its background cleared using the same background color as `GlyphAtlasContainer`, 
+        and another `DrawableCanvas` used for exporting which has a transparent background. The second `DrawableCanvas` is not visible.
+
+        Essentially we are doubling our drawing which is so totally sub optimal, but I don't think there is any way to resolve this without rewriting the entire 
+        thing using something other than `DrawableCanvas` and rendering the text with some other mechanism.
+        */
+
+        // Create the atlas that will be displayed
+        GlyphAtlasDisplay = new DrawableCanvas(AtlasWidth, AtlasHeight);
         GlyphAtlasDisplay.RenderSkia += (SKCanvas canvas) =>
         {
             canvas.Clear(AtlasBackgroundColor);
@@ -1094,9 +1195,6 @@ public partial class MainWindow : Window
                 var glyph = Glyphs[i];
                 if (glyph.Include)
                 {
-                    //var paint = new SKPaint{Color = new SKColor((byte)rng.Next(255), (byte)rng.Next(255), (byte)rng.Next(255)), Style = SKPaintStyle.Fill};
-                    //canvas.DrawRect(glyph.X, glyph.Y, glyph.Width, glyph.Height, paint);
-                    //FillPaint.Dispose();
                     var renderX = glyph.X - glyph.DestX + 1;
                     var renderY = glyph.Y + glyph.DestY + 1;
                     canvas.DrawText(glyph.AsciiChar, renderX, renderY, FillPaint);
@@ -1105,7 +1203,8 @@ public partial class MainWindow : Window
             }
         };
 
-        GlyphAtlasFinal = new DrawableCanvas(AtlasWidth, AtlasHeight); // Create the atlas that will be exported
+        // Create the atlas that will be exported
+        GlyphAtlasFinal = new DrawableCanvas(AtlasWidth, AtlasHeight);
         GlyphAtlasFinal.RenderSkia += (SKCanvas canvas) =>
         {
             canvas.Clear(SKColors.Transparent);
@@ -1266,5 +1365,4 @@ public partial class MainWindow : Window
         AtlasWidth = width;
         AtlasHeight = height;
     }
-    private void ColorButtonFlyout_Closed(object? sender, EventArgs e) => DoTheMagic();
 }

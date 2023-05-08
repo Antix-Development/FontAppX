@@ -25,15 +25,28 @@ FontAppX differs from FontApp in several ways:
 
 ### What's New?
 
-v1.0.0 (9 May 2023)
+v1.0.2 (10 May 2023)
+
+- Added textbox inputs for colorpicking flyouts.
+- Fixed an issue when clicking `CustomFontButton` where the custom font would not be set.
+
+<details><summary>v1.0.1 (10 May 2023)</summary><p>
+
+- Fixed filename generation issues.
+
+</p></details>
+
+<details><summary>v1.0.0 (9 May 2023)</summary><p>
 
 - Initial public release.
+
+</p></details>
 
 <hr>
 
 ### Installation
 
-For the MicroSoft Windows OS, FontAppX is distributed as a zip file and is portable, so just download the latest release, unzip it somewhere and then launch the `FontAppX` exectable inside the unzipped folder.
+For MicroSoft Windows, FontAppX is distributed as a zip file and is portable, so just download the latest release, unzip it somewhere and then launch the `FontAppX` exectable inside the unzipped folder.
 
 <hr>
 

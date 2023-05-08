@@ -132,13 +132,14 @@
 					<Button x:Name="FillColorButton" Grid.Column="0" Grid.Row="1" HorizontalContentAlignment="Center" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" BorderThickness="1" BorderBrush="Black">
 						<Button.Flyout>
 							<Flyout Placement="Top">
-								<Grid Width="300" ColumnDefinitions="24, *" RowDefinitions="Auto, Auto, Auto">
+								<Grid Width="300" ColumnDefinitions="24, *" RowDefinitions="Auto, Auto, Auto, Auto">
 									<Label Grid.Column="0" Grid.Row="0" VerticalContentAlignment="Center">R</Label>
 									<Slider x:Name="FillColorRedSlider" Grid.Column="1" Grid.Row="0" Value="0" Minimum="0" Maximum="255" Foreground="Red"/>
 									<Label Grid.Column="0" Grid.Row="1" VerticalContentAlignment="Center">G</Label>
 									<Slider x:Name="FillColorGreenSlider" Grid.Column="1" Grid.Row="1" Value="0" Minimum="0" Maximum="255" Foreground="Green"/>
 									<Label Grid.Column="0" Grid.Row="2" VerticalContentAlignment="Center">B</Label>
 									<Slider x:Name="FillColorBlueSlider" Grid.Column="1" Grid.Row="2" Value="0" Minimum="0" Maximum="255" Foreground="Blue"/>
+									<TextBox x:Name="FillColorTextBox" HorizontalAlignment="Center" Width="100" Grid.Row="3" Grid.Column="1" MaxLength="6" TextAlignment="Center"></TextBox>
 								</Grid>
 							</Flyout>
 						</Button.Flyout>
@@ -147,13 +148,14 @@
 					<Button x:Name="OutlineColorButton" Grid.Column="1" Grid.Row="1" HorizontalContentAlignment="Center" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" BorderThickness="1" BorderBrush="Black">
 						<Button.Flyout>
 							<Flyout Placement="Top">
-								<Grid Width="300" ColumnDefinitions="24, *" RowDefinitions="Auto, Auto, Auto">
+								<Grid Width="300" ColumnDefinitions="24, *" RowDefinitions="Auto, Auto, Auto, Auto">
 									<Label Grid.Column="0" Grid.Row="0" VerticalContentAlignment="Center">R</Label>
 									<Slider x:Name="OutlineColorRedSlider" Grid.Column="1" Grid.Row="0" Value="0" Minimum="0" Maximum="255" Foreground="Red"/>
 									<Label Grid.Column="0" Grid.Row="1" VerticalContentAlignment="Center">G</Label>
 									<Slider x:Name="OutlineColorGreenSlider" Grid.Column="1" Grid.Row="1" Value="0" Minimum="0" Maximum="255" Foreground="Green"/>
 									<Label Grid.Column="0" Grid.Row="2" VerticalContentAlignment="Center">B</Label>
 									<Slider x:Name="OutlineColorBlueSlider" Grid.Column="1" Grid.Row="2" Value="0" Minimum="0" Maximum="255" Foreground="Blue"/>
+									<TextBox x:Name="OutlineColorTextBox" HorizontalAlignment="Center" Width="100" Grid.Row="3" Grid.Column="1" MaxLength="6" TextAlignment="Center"></TextBox>
 								</Grid>
 							</Flyout>
 						</Button.Flyout>
@@ -194,13 +196,14 @@
 					<Button x:Name="AtlasColorButton" Grid.Column="1" Grid.Row="1" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Width="90" Margin="0,3,0,3" Padding="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" BorderThickness="1" BorderBrush="Black">
 						<Button.Flyout>
 							<Flyout Placement="Top">
-								<Grid Width="300" ColumnDefinitions="24, *" RowDefinitions="Auto, Auto, Auto">
+								<Grid Width="300" ColumnDefinitions="24, *" RowDefinitions="Auto, Auto, Auto, Auto">
 									<Label Grid.Column="0" Grid.Row="0" VerticalContentAlignment="Center">R</Label>
 									<Slider x:Name="AtlasColorRedSlider" Grid.Column="1" Grid.Row="0" Value="0" Minimum="0" Maximum="255" Foreground="Red"/>
 									<Label Grid.Column="0" Grid.Row="1" VerticalContentAlignment="Center">G</Label>
 									<Slider x:Name="AtlasColorGreenSlider" Grid.Column="1" Grid.Row="1" Value="0" Minimum="0" Maximum="255" Foreground="Green"/>
 									<Label Grid.Column="0" Grid.Row="2" VerticalContentAlignment="Center">B</Label>
 									<Slider x:Name="AtlasColorBlueSlider" Grid.Column="1" Grid.Row="2" Value="0" Minimum="0" Maximum="255" Foreground="Blue"/>
+									<TextBox x:Name="AtlasColorTextBox" HorizontalAlignment="Center" Width="100" Grid.Row="3" Grid.Column="1" MaxLength="6" TextAlignment="Center"></TextBox>
 								</Grid>
 							</Flyout>
 						</Button.Flyout>
