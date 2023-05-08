@@ -3,12 +3,10 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
-using Avalonia.VisualTree;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -21,12 +19,8 @@ public partial class MainWindow : Window
 
     readonly int FirstGlyph = 32; // SPACE (0x20) HARDCODED
     readonly int LastGlyph = 127; // DELETE (0x7f) HARDCODED
-    int IncludedGlyphCount; // Number of glyphs selected
-    float GridCellWidth;
-    float GridCellHeight;
     readonly int GridRows = 6; // HARDCODED
     readonly int GridCols = 16; // HARDCODED
-    readonly int GridFontSize = 14; // HARDCODED
 
     SolidColorBrush GlyphIncludedBrush = new SolidColorBrush(Colors.CornflowerBlue);
     SolidColorBrush GlyphExdcludedBrush = new SolidColorBrush(Colors.DimGray);
@@ -35,7 +29,7 @@ public partial class MainWindow : Window
 
     List<string> FontList = new List<string>(); // List of all system fonts, populated by iterating `FontManager`
 
-    string SystemFontName = "MS Arial";
+    string SystemFontName;
     string CustomFontName;
 
     bool UsingCustomFont;
@@ -51,11 +45,7 @@ public partial class MainWindow : Window
     float FontHeight;
     int FontSpacing;
 
-
     SKRect TextBounds = new SKRect();
-
-
-
 
     int FillColorR;
     int FillColorG;
@@ -69,14 +59,6 @@ public partial class MainWindow : Window
     SKColor OutlineColor;
     SKPaint StrokePaint;
 
-
-
-
-
-
-
-
-
     int AtlasWidth;
     int AtlasHeight;
 
@@ -84,16 +66,10 @@ public partial class MainWindow : Window
     int AtlasColorG;
     int AtlasColorB;
 
-    SKColor AtlasColor = SKColors.DimGray;
+    SKColor AtlasBackgroundColor;
 
-    int[] ZoomFactors = new int[]{ 1, 2, 4, 8 };
-
-    DrawableCanvas GlyphAtlas;
-    DrawableCanvas ZoomedGlyphAtlas;
-    SKBitmap GlyphAtlasBitmap;
-    SKImage GlyphAtlasImage;
-
-    SKCanvas GlyphAtlasCanvas;
+    DrawableCanvas GlyphAtlasDisplay;
+    DrawableCanvas GlyphAtlasFinal;
 
     Bitmap AboutLogoBitmap = new Bitmap("Assets/FontApp.png");
 
@@ -149,8 +125,6 @@ public partial class MainWindow : Window
 
         AtlasColorButton.Flyout.Closed += AtlasButtonFlyout_Closed;
 
-        ExportFormatdComboBox.SelectionChanged += ExportFormatdComboBox_SelectionChanged;
-
         NewProjectMenuItem.Click += NewProjectMenuItem_Click;
         OpenProjectMenuItem.Click += OpenProjectMenuItem_Click;
         SaveProjectMenuItem.Click += SaveProjectMenuItem_Click;
@@ -159,10 +133,7 @@ public partial class MainWindow : Window
         ExportProjectMenuItem.Click += ExportProjectMenuItem_Click;
         ExportProjectAsMenuItem.Click += ExportProjectAsMenuItem_Click;
         AboutFontAppMenuItem.Click += AboutFontAppMenuItem_Click;
-
     }
-
-
     /// <summary>
     /// Initialize application
     /// </summary>
@@ -212,7 +183,6 @@ public partial class MainWindow : Window
                 GlyphSelectionGrid.Children.Add(button); // Add
             }
         }
-
         NewProject(); // Reset everything
     }
     /// <summary>
@@ -222,8 +192,6 @@ public partial class MainWindow : Window
     /// <param name="e"></param>
     private void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
     {
-        GlyphAtlasImage?.Dispose();
-        GlyphAtlasBitmap?.Dispose();
         AboutLogoBitmap?.Dispose();
         FillPaint?.Dispose();
         StrokePaint?.Dispose();
@@ -450,7 +418,7 @@ public partial class MainWindow : Window
         var AtlasColorForeground = GetColorString(AtlasColorR, AtlasColorG, AtlasColorB);
         var AtlasColorBackground = GetInvertedColorString(AtlasColorR, AtlasColorG, AtlasColorB);
         var atlasColor = new SolidColorBrush(Color.Parse($"#{AtlasColorForeground}"));
-        AtlasColor = SKColor.Parse(AtlasColorForeground);
+        AtlasBackgroundColor = SKColor.Parse($"#{AtlasColorForeground}");
         AtlasColorButton.Foreground = new SolidColorBrush(Color.Parse($"#{AtlasColorBackground}"));
         AtlasColorButton.Background = atlasColor;
         AtlasColorButton.Content = AtlasColorForeground;
@@ -702,8 +670,6 @@ public partial class MainWindow : Window
         window.KeyUp += (s, e) => { if (e.Key == Key.Enter || e.Key == Key.Return || e.Key == Key.Escape) window.Close(); };
         window.ShowDialog(this);
     }
-
-
     /// <summary>
     /// Convert the given string to a bool
     /// </summary>
@@ -716,7 +682,6 @@ public partial class MainWindow : Window
     /// <param name="b"></param>
     /// <returns></returns>
     string BoolToString(bool b) => b ? "1" : "0";
-
     /// <summary>
     /// Prompt for filename and open project
     /// </summary>
@@ -750,8 +715,7 @@ public partial class MainWindow : Window
 
                     case "USE_CUSTOM_FONT":
                         UsingCustomFont = StringToBool(parts[1]);
-                        //CustomFontName_Label.ForeColor = SystemColors.HighlightText;
-                        //CustomFontName_Label.BackColor = SystemColors.Highlight;
+                        SetCutsomFontNameSelected(UsingCustomFont);
                         break;
 
                     case "CUSTOM_FONTNAME":
@@ -867,7 +831,7 @@ public partial class MainWindow : Window
 
         var dialog = new SaveFileDialog();
 
-        dialog.Filters.Add(new FileDialogFilter() { Name = "FontApp Files", Extensions = { "fap" } });
+        dialog.Filters.Add(new FileDialogFilter() { Name = "FontApp Files", Extensions = { "*.*" } });
 
         dialog.Title = "Save Project As";
 
@@ -888,7 +852,7 @@ public partial class MainWindow : Window
         {
             try
             {
-                StreamWriter writer = new StreamWriter(ProjectName);
+                StreamWriter writer = new StreamWriter($"{ProjectName}.fap");
 
                 writer.WriteLine($"SYSTEM_FONTNAME={SystemFontName}");
 
@@ -949,13 +913,8 @@ public partial class MainWindow : Window
         {
             try
             {
-
-
-
-
-
-                var renderBitmap = new RenderTargetBitmap(new PixelSize((int)GlyphAtlas.Bounds.Width, (int)GlyphAtlas.Bounds.Height));
-                renderBitmap.Render(GlyphAtlas);
+                var renderBitmap = new RenderTargetBitmap(new PixelSize((int)GlyphAtlasFinal.Bounds.Width, (int)GlyphAtlasFinal.Bounds.Height));
+                renderBitmap.Render(GlyphAtlasFinal);
                 renderBitmap.Save($"{ExportName}.png");
                 renderBitmap.Dispose();
 
@@ -982,10 +941,7 @@ public partial class MainWindow : Window
                             writer.WriteLine($"GLYPH={glyphInfo.CharCode},{glyphInfo.X + 1},{glyphInfo.Y + 1},{glyphInfo.Width - 2},{glyphInfo.Height - 2}");
                         }
                     }
-
                     writer.Close();
-
-                    //Debug.WriteLine("exported text");
                 }
                 else // JSON
                 {
@@ -1033,8 +989,6 @@ public partial class MainWindow : Window
                     writer.WriteLine("}");
 
                     writer.Close();
-
-                    //Debug.WriteLine("exported json");
                 }
             }
             catch (Exception ex)
@@ -1050,13 +1004,11 @@ public partial class MainWindow : Window
     }
     private async Task ExportProjectAs()
     {
-        Log("ExportProjectAs()");
-
         if (CustomFontName == null && SystemFontName == null) return;
 
         var dialog = new SaveFileDialog();
 
-        dialog.Filters.Add(new FileDialogFilter() { Name = "Exported Files", Extensions = { "json", "txt" } });
+        dialog.Filters.Add(new FileDialogFilter() { Name = "Export Files", Extensions = { "*.*" } });
 
         dialog.Title = "Export Project As";
 
@@ -1085,14 +1037,6 @@ public partial class MainWindow : Window
         else
         {
         }
-    }
-    private void ExportFormatdComboBox_SelectionChanged(object? sender, SelectionChangedEventArgs e)
-    {
-        if (UpdatingForm || ExportFormatdComboBox.SelectedIndex == -1) return;
-
-        int zoomFactor = ZoomFactors[ExportFormatdComboBox.SelectedIndex] ;
-
-        Log($"ExportFormatdComboBox_SelectionChanged() {zoomFactor}");
     }
     /// <summary>
     /// Regenerate the atlas
@@ -1146,39 +1090,49 @@ public partial class MainWindow : Window
 
         //foreach (var glyph in Glyphs) Log($"{glyph.CharCode}, {glyph.AsciiChar}, {glyph.X}, {glyph.Y} {glyph.Width}, {glyph.Height}");
 
-        GlyphAtlas = new DrawableCanvas(AtlasWidth, AtlasHeight); // Create the new atlas canvas
-
-        // Render atlas canvas
-        GlyphAtlas.RenderSkia += (SKCanvas canvas) =>
+        GlyphAtlasDisplay = new DrawableCanvas(AtlasWidth, AtlasHeight); // Create the atlas that will be displayed
+        GlyphAtlasDisplay.RenderSkia += (SKCanvas canvas) =>
         {
-            canvas.Clear(SKColors.SlateGray);
-            //canvas.Clear(AtlasBackgroundColor);
+            canvas.Clear(AtlasBackgroundColor);
 
             for (int i = 0; i < LastGlyph - FirstGlyph; i++)
             {
                 var glyph = Glyphs[i];
-
                 if (glyph.Include)
                 {
                     //var paint = new SKPaint{Color = new SKColor((byte)rng.Next(255), (byte)rng.Next(255), (byte)rng.Next(255)), Style = SKPaintStyle.Fill};
                     //canvas.DrawRect(glyph.X, glyph.Y, glyph.Width, glyph.Height, paint);
                     //FillPaint.Dispose();
-
                     var renderX = glyph.X - glyph.DestX + 1;
                     var renderY = glyph.Y + glyph.DestY + 1;
-
                     canvas.DrawText(glyph.AsciiChar, renderX, renderY, FillPaint);
-
                     if (OutlineWidth > 0) canvas.DrawText(glyph.AsciiChar, renderX, renderY, StrokePaint);
                 }
             }
         };
 
-        GlyphAtlasCanvasContainer.Content = GlyphAtlas; // Display atlas canvas
-        GlyphAtlas.InvalidateVisual();
-    }
-    //private Random rng = new Random();
+        GlyphAtlasFinal = new DrawableCanvas(AtlasWidth, AtlasHeight); // Create the atlas that will be exported
+        GlyphAtlasFinal.RenderSkia += (SKCanvas canvas) =>
+        {
+            canvas.Clear(SKColors.Transparent);
+            for (int i = 0; i < LastGlyph - FirstGlyph; i++)
+            {
+                var glyph = Glyphs[i];
+                if (glyph.Include)
+                {
+                    var renderX = glyph.X - glyph.DestX + 1;
+                    var renderY = glyph.Y + glyph.DestY + 1;
+                    canvas.DrawText(glyph.AsciiChar, renderX, renderY, FillPaint);
+                    if (OutlineWidth > 0) canvas.DrawText(glyph.AsciiChar, renderX, renderY, StrokePaint);
+                }
+            }
+        };
 
+        GlyphAtlasCanvasContainer.Content = GlyphAtlasDisplay; // Display atlas canvas
+
+        GlyphAtlasFinal.InvalidateVisual();
+        GlyphAtlasDisplay.InvalidateVisual();
+    }
     private void UpdateTextBounds(string s)
     {
         if (OutlineWidth > 0) // Results will differ whether outlined or not
@@ -1319,5 +1273,4 @@ public partial class MainWindow : Window
         AtlasHeight = height;
     }
     private void ColorButtonFlyout_Closed(object? sender, EventArgs e) => DoTheMagic();
-
 }

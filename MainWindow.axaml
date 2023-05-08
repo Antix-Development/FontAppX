@@ -42,7 +42,6 @@
 		<Style Selector="ComboBox">
 			<Setter Property="HorizontalContentAlignment" Value="Center"></Setter>
 			<Setter Property="Margin" Value="3,2,3,2"></Setter>
-
 		</Style>
 
 		<Style Selector="Label">
@@ -114,7 +113,7 @@
 
 					<ComboBox x:Name="SmoothingModeComboBox" HorizontalAlignment="Stretch" SelectedIndex="0" Grid.Column="1" Grid.Row="1">
 						<ComboBoxItem>Pixelated</ComboBoxItem>
-						<ComboBoxItem>Antialiased</ComboBoxItem>
+						<ComboBoxItem>Smooth</ComboBoxItem>
 					</ComboBox>
 				</Grid>
 
@@ -189,7 +188,7 @@
 
 				<Grid Grid.Row="1" Margin="0,0,3,0" x:Name="GlyphSelectionGrid" Height="180" ColumnDefinitions="1*, 1*, 1*, 1*, 1*, 1*, 1*, 1*, 1*, 1*, 1*, 1*, 1*, 1*, 1*, 1*" RowDefinitions="1*, 1*, 1*, 1*, 1*, 1*"/>
 
-				<Grid Grid.Row="2" ColumnDefinitions="*, Auto, Auto">
+				<Grid Grid.Row="2" ColumnDefinitions="*, Auto">
 					<Label Grid.Column="0">Glyph Atlas</Label>
 
 					<Button x:Name="AtlasColorButton" Grid.Column="1" Grid.Row="1" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Width="90" Margin="0,3,0,3" Padding="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" BorderThickness="1" BorderBrush="Black">
@@ -206,13 +205,6 @@
 							</Flyout>
 						</Button.Flyout>
 					</Button>
-
-					<ComboBox x:Name="ExportFormatdComboBox" SelectedIndex="0" Grid.Column="2" Grid.Row="1" HorizontalAlignment="Stretch">
-						<ComboBoxItem>1X</ComboBoxItem>
-						<ComboBoxItem>2X</ComboBoxItem>
-						<ComboBoxItem>4X</ComboBoxItem>
-						<ComboBoxItem>8X</ComboBoxItem>
-					</ComboBox>
 
 				</Grid>
 

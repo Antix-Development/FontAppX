@@ -51,13 +51,13 @@ public partial class DrawableCanvas : UserControl
         HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left;
         VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top;
 
-        Initialized += DrawableCanvas_Initialized;
+        //Initialized += DrawableCanvas_Initialized;
     }
 
-    private void DrawableCanvas_Initialized(object? sender, EventArgs e)
-    {
-        Debug.WriteLine($"DrawableCanvas_Initialized() {Width},{Height}");
-    }
+    //private void DrawableCanvas_Initialized(object? sender, EventArgs e)
+    //{
+    //    Debug.WriteLine($"DrawableCanvas_Initialized() {Width},{Height}");
+    //}
 
     public override void Render(DrawingContext context)
     {

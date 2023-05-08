@@ -19,9 +19,6 @@ namespace FontAppX
         public int Width = 0;
         public int Height = 0;
 
-        //public int SourceX = 0; // Used when drawing to atlas
-        //public int SourceY = 0;
-
         public int DestX = 0;
         public int DestY = 0;
 
