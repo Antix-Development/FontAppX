@@ -473,10 +473,8 @@ public partial class MainWindow : Window
     /// <param name="e"></param>
     private void CustomFontNameButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
-        if (CustomFontTypeface != null)
+        if (!UsingCustomFont)
         {
-            SystemFontListBox.SelectedIndex = -1;
-
             SystemFontListBox.SelectedIndex = -1;
             SystemFontName = null;
             UsingCustomFont = true;
@@ -509,11 +507,9 @@ public partial class MainWindow : Window
         {
             var path = fileNames[0];
 
-            Log($"{path}");
-
             CustomFontTypeface?.Dispose();
             CustomFontTypeface = SKTypeface.FromFile(path);
-            Log($"font-family:{CustomFontTypeface.FamilyName}");
+            //Log($"font-family:{CustomFontTypeface.FamilyName}");
 
             CustomFontNameButton.Content = CustomFontTypeface.FamilyName;
 
@@ -553,8 +549,6 @@ public partial class MainWindow : Window
     /// <param name="e"></param>
     private void SystemFontListBox_SelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
-        //Log($"SystemFontListBox:{SystemFontListBox.SelectedIndex}");
-
         if (SystemFontListBox.SelectedIndex == -1) return;
 
         SystemFontName = SystemFontListBox.SelectedItem.ToString();
