@@ -21,7 +21,7 @@
 		<Grid ColumnDefinitions="90, *" RowDefinitions="*, Auto">
 			<Image x:Name="AboutLogo" Width="56" Height="56" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"></Image>
 			<StackPanel Grid.Column="1" Grid.Row="0" VerticalAlignment="Center">
-				<Label Padding="0,20,0,0">FontApp v1.0.2</Label>
+				<Label Padding="0,20,0,0">FontApp v1.0.3</Label>
 				<Label Margin="0,2,0,0">(C) 2023 Cliff Earl, Antix Development</Label>
 				<Button Height="20" Padding="0" x:Name="HomePageButton" Foreground="Blue" Background="White">Visit homepage</Button>
 				<Button Height="20" Padding="0" x:Name="SponsorPageButton" Foreground="Blue" Background="White">Buy Cliff a coffee</Button>

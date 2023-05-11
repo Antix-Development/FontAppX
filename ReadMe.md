@@ -25,11 +25,16 @@ FontAppX differs from FontApp in several ways:
 
 ### What's New?
 
-v1.0.2 (10 May 2023)
+v1.0.3 (12 May 2023)
+
+- Fixed issue where NewProject() would add to the system font list instead of replacing it.
+
+<details><summary>v1.0.2 (10 May 2023)</summary><p>
 
 - Added textbox inputs for colorpicking flyouts.
 - Fixed an issue when clicking `CustomFontButton` where the custom font would not be set.
 
+</p></details>
 <details><summary>v1.0.1 (10 May 2023)</summary><p>
 
 - Fixed filename generation issues.

@@ -26,7 +26,7 @@ public partial class MainWindow : Window
     SolidColorBrush GlyphIncludedBrush = new SolidColorBrush(Colors.CornflowerBlue);
     SolidColorBrush GlyphExdcludedBrush = new SolidColorBrush(Colors.DimGray);
 
-    SKFontManager FontManager = SKFontManager.Default;
+    SKFontManager SystemFonts = SKFontManager.Default;
 
     List<string> FontList = new List<string>(); // List of all system fonts, populated by iterating `FontManager`
 
@@ -133,9 +133,6 @@ public partial class MainWindow : Window
         AtlasColorTextBox.KeyDown += ColorTextBox_KeyDown;
         AtlasColorTextBox.KeyUp += AtlasColorTextBox_KeyUp;
 
-
-
-
         NewProjectMenuItem.Click += NewProjectMenuItem_Click;
         OpenProjectMenuItem.Click += OpenProjectMenuItem_Click;
         SaveProjectMenuItem.Click += SaveProjectMenuItem_Click;
@@ -145,8 +142,6 @@ public partial class MainWindow : Window
         ExportProjectAsMenuItem.Click += ExportProjectAsMenuItem_Click;
         AboutFontAppMenuItem.Click += AboutFontAppMenuItem_Click;
     }
-
-
     /// <summary>
     /// Initialize application
     /// </summary>
@@ -208,7 +203,7 @@ public partial class MainWindow : Window
         AboutLogoBitmap?.Dispose();
         FillPaint?.Dispose();
         StrokePaint?.Dispose();
-        FontManager.Dispose();
+        SystemFonts.Dispose();
         CustomFontTypeface?.Dispose();
     }
     private void NewProject()
@@ -224,8 +219,9 @@ public partial class MainWindow : Window
         CustomFontName = null;
 
         SystemFontListBox.SelectedIndex = -1; // Repopulate system font list
+        SystemFontListBox.Items = null;
         FontList.Clear();
-        foreach (var font in FontManager.GetFontFamilies()) FontList.Add(font);
+        foreach (var font in SystemFonts.GetFontFamilies()) FontList.Add(font);
         FontList.Sort();
         SystemFontListBox.Items = FontList;
 
@@ -907,8 +903,7 @@ public partial class MainWindow : Window
 
         if (fileName != null)
         {
-            ProjectName = (fileName.EndsWith(".fap")) ? fileName.Substring(0, fileName.Length - 4) : fileName;
-
+            ProjectName = fileName;
             SaveProject();
         }
     }
@@ -921,6 +916,8 @@ public partial class MainWindow : Window
         {
             try
             {
+                ProjectName = (ProjectName.EndsWith(".fap")) ? ProjectName.Substring(0, ProjectName.Length - 4) : ProjectName;
+
                 StreamWriter writer = new StreamWriter($"{ProjectName}.fap");
 
                 writer.WriteLine($"SYSTEM_FONTNAME={SystemFontName}");
@@ -982,6 +979,15 @@ public partial class MainWindow : Window
         {
             try
             {
+                if (ExportName.EndsWith(".txt"))
+                {
+                    ExportName = ExportName.Substring(0, ExportName.Length - 4);
+                }
+                else if (ExportName.EndsWith(".json"))
+                {
+                    ExportName = ExportName.Substring(0, ExportName.Length - 5);
+                }
+
                 var renderBitmap = new RenderTargetBitmap(new PixelSize((int)GlyphAtlasFinal.Bounds.Width, (int)GlyphAtlasFinal.Bounds.Height));
                 renderBitmap.Render(GlyphAtlasFinal);
                 renderBitmap.Save($"{ExportName}.png");
@@ -1085,18 +1091,7 @@ public partial class MainWindow : Window
 
         if (fileName != null)
         {
-            if (fileName.EndsWith(".txt"))
-            {
-                ExportName = fileName.Substring(0, fileName.Length - 4);
-            }
-            else if (fileName.EndsWith(".json"))
-            {
-                ExportName = fileName.Substring(0, fileName.Length - 5);
-            }
-            else
-            {
-                ExportName = fileName;
-            }
+            ExportName = fileName;
 
             ExportProject();
         }
